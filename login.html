@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masuk - TTS Bahasa Arab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-pattern flex-center">
+  <div class="card">
+    <h2 class="text-center">Masuk ke Akun</h2>
+    <div id="alert" class="alert hidden"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required placeholder="nama@email.com">
+      </div>
+      <div class="form-group">
+        <label for="password">Kata Sandi</label>
+        <input type="password" id="password" required placeholder="••••••••">
+      </div>
+      <button type="submit" id="btn-submit" class="btn btn-primary btn-block">Masuk</button>
+    </form>
+    <p class="text-center mt-3">Belum punya akun? <a href="register.html">Daftar di sini</a></p>
+  </div>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

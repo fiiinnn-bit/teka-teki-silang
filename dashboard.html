@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Siswa - TTS Bahasa Arab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-pattern">
+  <div class="container">
+    <header class="navbar">
+      <h1>TTS BAHASA ARAB</h1>
+      <button id="btn-logout" class="btn btn-danger btn-sm">Keluar</button>
+    </header>
+
+    <div class="card mt-4">
+      <div class="profile-section">
+        <h3>Informasi Siswa</h3>
+        <p><strong>Nama:</strong> <span id="student-name">Loading...</span></p>
+        <p><strong>Kelas:</strong> <span id="student-class">Loading...</span></p>
+        <p><strong>Status Pengerjaan:</strong> <span id="student-status" class="badge">Belum dikerjakan</span></p>
+        <p><strong>Nilai Terakhir:</strong> <span id="student-score" class="score-highlight">-- / 100</span></p>
+      </div>
+
+      <div class="btn-group mt-4">
+        <button id="btn-start" class="btn btn-primary btn-lg">MULAI TTS</button>
+        <button id="btn-continue" class="btn btn-warning btn-lg hidden">LANJUTKAN</button>
+        <button id="btn-result" class="btn btn-secondary btn-lg hidden">LIHAT HASIL</button>
+        <a id="btn-admin-link" href="admin.html" class="btn btn-info btn-lg hidden">PANEL ADMIN</a>
+      </div>
+    </div>
+  </div>
+  <script src="js/supabase.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

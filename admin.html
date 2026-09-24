@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin - TTS Bahasa Arab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-pattern">
+  <div class="container">
+    <header class="navbar">
+      <h1>DASHBOARD ADMIN</h1>
+      <div>
+        <a href="dashboard.html" class="btn btn-secondary btn-sm">Ke Dashboard Siswa</a>
+        <button id="btn-logout" class="btn btn-danger btn-sm">Keluar</button>
+      </div>
+    </header>
+
+    <div class="stats-grid mt-4">
+      <div class="stat-card">
+        <h3>Total Siswa</h3>
+        <p id="stat-total-students">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Jumlah Pengerjaan</h3>
+        <p id="stat-total-attempts">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Rata-rata Nilai</h3>
+        <p id="stat-avg-score">0.00</p>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="filter-bar">
+        <input type="text" id="search-input" placeholder="Cari nama siswa...">
+        <select id="class-filter">
+          <option value="">Semua Kelas</option>
+        </select>
+        <select id="sort-filter">
+          <option value="newest">Terbaru</option>
+          <option value="highest">Nilai Tertinggi</option>
+          <option value="lowest">Nilai Terendah</option>
+          <option value="fastest">Waktu Tercepat</option>
+        </select>
+      </div>
+
+      <div class="table-responsive mt-3">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Kelas</th>
+              <th>Nilai</th>
+              <th>Benar</th>
+              <th>Salah</th>
+              <th>Waktu</th>
+              <th>Tanggal</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body">
+            <tr>
+              <td colspan="7" class="text-center">Memuat data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="js/supabase.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

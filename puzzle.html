@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengerjaan TTS Bahasa Arab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="puzzle-wrapper">
+    <header class="puzzle-header">
+      <div class="header-info">
+        <h2>Teka-Teki Silang Bahasa Arab</h2>
+        <p><span id="student-name">...</span> (<span id="student-class">...</span>)</p>
+      </div>
+      <div class="timer-box">
+        Waktu: <span id="timer">00:00</span>
+      </div>
+    </header>
+
+    <div class="puzzle-container">
+      <div class="grid-section">
+        <div id="crossword-grid" class="grid-table"></div>
+      </div>
+
+      <div class="clues-section">
+        <div class="clue-column">
+          <h3>MENDATAR (ACROSS)</h3>
+          <ul id="clues-across" class="clues-list"></ul>
+        </div>
+        <div class="clue-column">
+          <h3>MENURUN (DOWN)</h3>
+          <ul id="clues-down" class="clues-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <footer class="puzzle-footer">
+      <button id="btn-submit" class="btn btn-success btn-lg">PERIKSA JAWABAN</button>
+      <a href="dashboard.html" class="btn btn-secondary">KEMBALI KE DASHBOARD</a>
+    </footer>
+  </div>
+  <script src="js/supabase.js"></script>
+  <script src="js/puzzle.js"></script>
+</body>
+</html>

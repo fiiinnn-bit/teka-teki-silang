@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hasil TTS Bahasa Arab</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-pattern flex-center">
+  <div class="card text-center result-card">
+    <h1 class="celebration">🎉 TTS SELESAI</h1>
+    
+    <div class="result-details">
+      <p><strong>Nama:</strong> <span id="res-name">-</span></p>
+      <p><strong>Kelas:</strong> <span id="res-class">-</span></p>
+      <p><strong>Jawaban Benar:</strong> <span id="res-correct">0</span> / <span id="res-total">18</span></p>
+      <p><strong>Jawaban Salah:</strong> <span id="res-wrong">0</span></p>
+      <div class="score-box mt-3">
+        <span>NILAI AKHIR</span>
+        <h2 id="res-score">0.00</h2>
+      </div>
+      <p class="mt-2"><strong>Waktu Pengerjaan:</strong> <span id="res-duration">00:00</span></p>
+    </div>
+
+    <div class="btn-group mt-4">
+      <button id="btn-retry" class="btn btn-warning">ULANGI TTS</button>
+      <a href="dashboard.html" class="btn btn-primary">KEMBALI KE DASHBOARD</a>
+    </div>
+  </div>
+  <script src="js/supabase.js"></script>
+  <script src="js/result.js"></script>
+</body>
+</html>

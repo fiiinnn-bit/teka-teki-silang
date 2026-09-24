@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTS Bahasa Arab - Portal Utama</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-pattern flex-center">
+  <div class="card text-center">
+    <h1 class="brand-title">مرحباً بكم</h1>
+    <h2>Teka-Teki Silang Bahasa Arab</h2>
+    <p class="subtitle">Platform Pembelajaran Media Interaktif Bahasa Arab</p>
+    <div class="btn-group">
+      <a href="login.html" class="btn btn-primary">Masuk / Login</a>
+      <a href="register.html" class="btn btn-secondary">Daftar Akun Baru</a>
+    </div>
+  </div>
+  <script src="js/supabase.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        window.location.href = 'dashboard.html';
+      }
+    });
+  </script>
+</body>
+</html>
