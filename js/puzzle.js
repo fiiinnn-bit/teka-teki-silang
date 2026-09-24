@@ -14,35 +14,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   const GRID_ROWS = 20;
   const GRID_COLS = 23;
 
-  // Pemetaan kata yang presisi sesuai PDF (Kolom 22 = Paling Kanan)
+  /**
+   * MAP PERSISI BERDASARKAN FOTO TTS:
+   * row: Indeks baris (0-19 dari atas ke bawah)
+   * col: Indeks kolom (0-22 dari kiri ke kanan)
+   * len: Jumlah kotak/huruf
+   *
+   * Catatan Penting Penulisan:
+   * - Mendatar (across): Huruf pertama di (row, col), berjalan MENDATAR KE KIRI (col - i).
+   * - Menurun (down): Huruf pertama di (row, col), berjalan MENURUN KE BAWAH (row + i).
+   */
   const PUZZLE_WORDS = [
-    { num: 4, dir: 'across', text: 'Ibu', row: 1, col: 12, len: 3 },
-    { num: 5, dir: 'across', text: 'Ruang kantor', row: 4, col: 22, len: 10 },
-    { num: 9, dir: 'across', text: 'Kamar mandi', row: 6, col: 14, len: 4 },
-    { num: 11, dir: 'across', text: 'Kamar tidur', row: 8, col: 22, len: 9 },
-    { num: 14, dir: 'across', text: 'Kakak perempuan saya', row: 9, col: 22, len: 14 },
-    { num: 16, dir: 'across', text: 'Adik perempuan saya', row: 11, col: 15, len: 14 },
-    { num: 17, dir: 'across', text: 'Ayah', row: 14, col: 8, len: 3 },
-    { num: 18, dir: 'across', text: 'Dia pergi', row: 15, col: 11, len: 3 },
+    // --- ACROSS (MENDATAR) ---
+    { num: 4, dir: 'across', text: 'Ibu', row: 1, col: 12, len: 3 },                  // 1. Mother (أم)
+    { num: 5, dir: 'across', text: 'Ruang kantor', row: 4, col: 22, len: 10 },        // 5. Office (غرفة المكتب)
+    { num: 9, dir: 'across', text: 'Kamar mandi', row: 6, col: 14, len: 4 },          // 9. Bathroom (حمام)
+    { num: 11, dir: 'across', text: 'Kamar tidur', row: 8, col: 22, len: 9 },         // 11. Bedroom (غرفة النوم)
+    { num: 14, dir: 'across', text: 'Kakak perempuan saya', row: 9, col: 22, len: 14 },// 14. Older sister (أختي الكبيرة)
+    { num: 16, dir: 'across', text: 'Adik perempuan saya', row: 11, col: 15, len: 14 },// 16. Younger sister (أختي الصغيرة)
+    { num: 17, dir: 'across', text: 'Ayah', row: 14, col: 8, len: 3 },                 // 17. Father (أب)
+    { num: 18, dir: 'across', text: 'Dia pergi', row: 15, col: 11, len: 3 },           // 18. Went (ذهب)
 
-    { num: 1, dir: 'down', text: 'Pintu gerbang', row: 0, col: 8, len: 5 },
-    { num: 2, dir: 'down', text: 'Ruang belajar', row: 0, col: 19, len: 10 },
-    { num: 3, dir: 'down', text: 'Saya tidur', row: 1, col: 11, len: 4 },
-    { num: 5, dir: 'down', text: 'Ruang tamu', row: 4, col: 18, len: 9 },
-    { num: 6, dir: 'down', text: 'Lantai atas', row: 4, col: 3, len: 5 },
-    { num: 7, dir: 'down', text: 'Balkon/teras rumah', row: 6, col: 15, len: 4 },
-    { num: 8, dir: 'down', text: 'Lantai bawah', row: 6, col: 11, len: 5 },
-    { num: 10, dir: 'down', text: 'Dapur', row: 8, col: 21, len: 4 },
-    { num: 12, dir: 'down', text: 'Kakak laki-laki saya', row: 9, col: 11, len: 10 },
-    { num: 13, dir: 'down', text: 'Ibu rumah tangga', row: 9, col: 7, len: 10 },
-    { num: 14, dir: 'down', text: 'Adik laki-laki saya', row: 9, col: 0, len: 10 },
-    { num: 15, dir: 'down', text: 'Ruang makan', row: 10, col: 13, len: 10 }
+    // --- DOWN (MENURUN) ---
+    { num: 1, dir: 'down', text: 'Pintu gerbang', row: 0, col: 8, len: 5 },           // 1. Gate (بوابة)
+    { num: 2, dir: 'down', text: 'Ruang belajar', row: 0, col: 19, len: 10 },         // 2. Study room (غرفة التعلم)
+    { num: 3, dir: 'down', text: 'Saya tidur', row: 1, col: 11, len: 4 },             // 3. Sleep (أنام)
+    { num: 5, dir: 'down', text: 'Ruang tamu', row: 4, col: 18, len: 9 },             // 5. Living room (غرفة الجلوس)
+    { num: 6, dir: 'down', text: 'Lantai atas', row: 4, col: 3, len: 5 },              // 6. Upper floor (الطابق)
+    { num: 7, dir: 'down', text: 'Balkon/teras rumah', row: 6, col: 15, len: 4 },     // 7. Balcony (شرفة)
+    { num: 8, dir: 'down', text: 'Lantai bawah', row: 6, col: 11, len: 5 },            // 8. Lower floor (السفل)
+    { num: 10, dir: 'down', text: 'Dapur', row: 8, col: 21, len: 4 },                 // 10. Kitchen (مطبخ)
+    { num: 12, dir: 'down', text: 'Kakak laki-laki saya', row: 9, col: 11, len: 10 }, // 12. Older brother (أخي الكبير)
+    { num: 13, dir: 'down', text: 'Ibu rumah tangga', row: 9, col: 7, len: 10 },      // 13. Housewife (ربة البيت)
+    { num: 14, dir: 'down', text: 'Adik laki-laki saya', row: 9, col: 0, len: 10 },   // 14. Younger brother (أخي الصغير)
+    { num: 15, dir: 'down', text: 'Ruang makan', row: 10, col: 13, len: 10 }          // 15. Dining room (غرفة الأكل)
   ];
 
   const cellMap = {};
 
   async function init() {
-    // 1. Ambil Profil Siswa
+    // Load Profil Siswa
     const { data: profile } = await supabaseClient
       .from('profiles')
       .select('*')
@@ -54,11 +65,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('student-class').textContent = profile.class_name;
     }
 
-    // 2. Ambil Puzzle ID
+    // Load Puzzle
     const { data: puzzles } = await supabaseClient.from('puzzles').select('id').limit(1).maybeSingle();
     const puzzleId = puzzles ? puzzles.id : '00000000-0000-0000-0000-000000000001';
 
-    // 3. Ambil Sesi Attempt yang Belum Selesai
+    // Session Pengerjaan
     let { data: existingAttempt } = await supabaseClient
       .from('puzzle_attempts')
       .select('*')
@@ -102,6 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const gridEl = document.getElementById('crossword-grid');
     gridEl.innerHTML = '';
 
+    // Render kotak dasar 20 x 23
     for (let r = 0; r < GRID_ROWS; r++) {
       for (let c = 0; c < GRID_COLS; c++) {
         const cell = document.createElement('div');
@@ -112,11 +124,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
+    // Plot kata-kata ke dalam kotak
     PUZZLE_WORDS.forEach(w => {
       for (let i = 0; i < w.len; i++) {
         let r = w.row + (w.dir === 'down' ? i : 0);
-        // Kata mendatar berjalan berkurang kolomnya (kanan ke kiri)
-        let c = w.col - (w.dir === 'across' ? i : 0);
+        let c = w.col - (w.dir === 'across' ? i : 0); // Ke Kiri untuk Across
 
         const cell = gridEl.querySelector(`[data-row='${r}'][data-col='${c}']`);
         if (cell) {
@@ -132,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
-      // Nomor ditaruh di kotak awal kata
+      // Pasang Nomor Soal di Kotak Pertama Kata
       const numCell = gridEl.querySelector(`[data-row='${w.row}'][data-col='${w.col}']`);
       if (numCell && !numCell.querySelector('.cell-number')) {
         const numSpan = document.createElement('span');
@@ -151,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     PUZZLE_WORDS.forEach(w => {
       const li = document.createElement('li');
-      li.textContent = `${w.num}. ${w.text}`;
+      li.textContent = `${w.num}. | ${w.text}`;
       li.dataset.num = w.num;
       li.dataset.dir = w.dir;
 
@@ -205,6 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const val = e.target.value;
         const arabicRegex = /^[\u0600-\u06FF]$/;
 
+        // Hanya menerima karakter Unicode Arab
         if (!arabicRegex.test(val)) {
           e.target.value = '';
           return;
@@ -226,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function moveToNextCell(r, c) {
     if (!currentWord) return;
     let nextR = r + (currentWord.dir === 'down' ? 1 : 0);
-    let nextC = c - (currentWord.dir === 'across' ? 1 : 0);
+    let nextC = c - (currentWord.dir === 'across' ? 1 : 0); // Maju ke kiri untuk across
 
     const nextInput = cellMap[`${nextR},${nextC}`];
     if (nextInput) nextInput.focus();
@@ -235,7 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function moveToPrevCell(r, c) {
     if (!currentWord) return;
     let prevR = r - (currentWord.dir === 'down' ? 1 : 0);
-    let prevC = c + (currentWord.dir === 'across' ? 1 : 0);
+    let prevC = c + (currentWord.dir === 'across' ? 1 : 0); // Mundur ke kanan untuk across
 
     const prevInput = cellMap[`${prevR},${prevC}`];
     if (prevInput) {
