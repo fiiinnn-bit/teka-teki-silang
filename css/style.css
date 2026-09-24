@@ -15,7 +15,11 @@
   --border-color: #e2e8f0;
   
   /* Ukuran Grid TTS */
-  --cell-size: 36px;
+  /* Di layar lebar: kotak 36px seperti semula.
+     Di layar sempit: kotak otomatis mengecil supaya 33 kolom tetap muat
+     tanpa terpotong / tanpa perlu geser ke samping.
+     106px = total padding wrapper + padding grid-section + border + gap grid */
+  --cell-size: clamp(9px, calc((100vw - 106px) / 33), 36px);
 }
 
 /* ==========================================================================
@@ -475,5 +479,21 @@ body {
   .navbar {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .puzzle-wrapper {
+    padding: 8px;
+  }
+
+  .grid-section {
+    padding: 10px;
+  }
+
+  .cell-number {
+    font-size: 7px;
+  }
+
+  .cell input {
+    font-size: 0.9rem;
   }
 }
