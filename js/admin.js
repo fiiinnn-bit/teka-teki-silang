@@ -18,6 +18,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const classFilter = document.getElementById('class-filter');
   const sortFilter = document.getElementById('sort-filter');
   const btnLogout = document.getElementById('btn-logout');
+  const btnDeleteAll = document.getElementById('btn-delete-all');
+
+  const detailModal = document.getElementById('detail-modal');
+  const detailModalTitle = document.getElementById('detail-modal-title');
+  const detailModalList = document.getElementById('detail-modal-list');
+  const detailModalClose = document.getElementById('detail-modal-close');
+
+  // Label soal untuk tampilan rincian (tidak memengaruhi penilaian,
+  // yang tetap sepenuhnya dihitung di database).
+  const CLUE_TEXT = {
+    'across-4': 'Ibu', 'across-5': 'Ruang kantor', 'across-9': 'Kamar mandi',
+    'across-11': 'Kamar tidur', 'across-14': 'Kakak perempuan saya',
+    'across-16': 'Adik perempuan saya', 'across-17': 'Ayah', 'across-18': 'Dia pergi',
+    'down-1': 'Pintu gerbang', 'down-2': 'Ruang belajar', 'down-3': 'Saya tidur',
+    'down-5': 'Ruang tamu', 'down-6': 'Lantai atas', 'down-7': 'Balkon/teras rumah',
+    'down-8': 'Lantai bawah', 'down-10': 'Dapur', 'down-12': 'Kakak laki-laki saya',
+    'down-13': 'Ibu rumah tangga', 'down-14': 'Adik laki-laki saya', 'down-15': 'Ruang makan',
+  };
 
   async function loadAdminData() {
     const { data: students } = await supabaseClient.from('profiles').select('*').eq('role', 'student');
@@ -31,9 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (allAttemptsData.length > 0) {
       const avg = allAttemptsData.reduce((acc, curr) => acc + Number(curr.score), 0) / allAttemptsData.length;
       document.getElementById('stat-avg-score').textContent = avg.toFixed(2);
+    } else {
+      document.getElementById('stat-avg-score').textContent = '0.00';
     }
 
-    const classes = [...new Set(students.map(s => s.class_name).filter(Boolean))];
+    const classes = [...new Set((students || []).map(s => s.class_name).filter(Boolean))];
     classFilter.innerHTML = '<option value="">Semua Kelas</option>';
     classes.forEach(c => {
       const opt = document.createElement('option');
@@ -67,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     tbody.innerHTML = '';
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data pengerjaan</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada data pengerjaan</td></tr>';
       return;
     }
 
@@ -85,10 +105,88 @@ document.addEventListener('DOMContentLoaded', async () => {
         <td style="color:red;">${item.wrong_answers}</td>
         <td>${m}:${s}</td>
         <td>${dateStr}</td>
+        <td>
+          <button class="btn btn-info btn-sm btn-detail" data-id="${item.id}" data-name="${item.profiles?.full_name || '-'}">Detail</button>
+          <button class="btn btn-danger btn-sm btn-delete" data-id="${item.id}">Hapus</button>
+        </td>
       `;
       tbody.appendChild(tr);
     });
+
+    // Pasang event listener untuk tombol yang baru dibuat
+    tbody.querySelectorAll('.btn-detail').forEach(btn => {
+      btn.addEventListener('click', () => openDetail(btn.dataset.id, btn.dataset.name));
+    });
+    tbody.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', () => deleteAttempt(btn.dataset.id));
+    });
   }
+
+  // ---------------- DETAIL BENAR/SALAH PER SOAL ----------------
+  async function openDetail(attemptId, studentName) {
+    detailModalTitle.textContent = `Rincian Jawaban - ${studentName}`;
+    detailModalList.innerHTML = '<li>Memuat...</li>';
+    detailModal.classList.remove('hidden');
+
+    const { data: details, error } = await supabaseClient
+      .from('puzzle_answers')
+      .select('*')
+      .eq('attempt_id', attemptId)
+      .order('question_number', { ascending: true });
+
+    if (error || !details || details.length === 0) {
+      detailModalList.innerHTML = '<li>Tidak ada data rincian untuk pengerjaan ini.</li>';
+      return;
+    }
+
+    detailModalList.innerHTML = '';
+    details.forEach(d => {
+      const key = `${d.direction || 'across'}-${d.question_number}`;
+      const label = CLUE_TEXT[key] || CLUE_TEXT[`down-${d.question_number}`] || CLUE_TEXT[`across-${d.question_number}`] || `Soal ${d.question_number}`;
+      const dirLabel = d.direction === 'down' ? 'Menurun' : 'Mendatar';
+
+      const li = document.createElement('li');
+      li.style.display = 'flex';
+      li.style.justifyContent = 'space-between';
+      li.style.alignItems = 'center';
+      li.style.borderBottom = '1px solid var(--border-color)';
+      li.innerHTML = `
+        <span>${d.is_correct ? '✅' : '❌'} <strong>${d.question_number}</strong> (${dirLabel}) — ${label}</span>
+        <span style="direction:rtl; font-family:'Amiri', serif; font-size:1.1rem;">${d.user_answer || '(kosong)'}</span>
+      `;
+      detailModalList.appendChild(li);
+    });
+  }
+
+  detailModalClose.addEventListener('click', () => detailModal.classList.add('hidden'));
+  detailModal.addEventListener('click', (e) => {
+    if (e.target === detailModal) detailModal.classList.add('hidden');
+  });
+
+  // ---------------- HAPUS SATU DATA PENGERJAAN ----------------
+  async function deleteAttempt(attemptId) {
+    if (!confirm('Yakin ingin menghapus data pengerjaan ini? Tindakan ini tidak bisa dibatalkan.')) return;
+
+    const { error } = await supabaseClient.rpc('admin_delete_attempt', { p_attempt_id: attemptId });
+    if (error) {
+      alert('Gagal menghapus: ' + error.message);
+      return;
+    }
+    await loadAdminData();
+  }
+
+  // ---------------- HAPUS SEMUA DATA PENGERJAAN ----------------
+  btnDeleteAll.addEventListener('click', async () => {
+    if (!confirm('Yakin ingin menghapus SEMUA data pengerjaan siswa? Tindakan ini tidak bisa dibatalkan!')) return;
+    if (!confirm('Konfirmasi sekali lagi: SEMUA riwayat nilai akan hilang permanen. Lanjutkan?')) return;
+
+    const { error } = await supabaseClient.rpc('admin_delete_all_attempts');
+    if (error) {
+      alert('Gagal menghapus semua data: ' + error.message);
+      return;
+    }
+    await loadAdminData();
+  });
 
   searchInput.addEventListener('input', renderTable);
   classFilter.addEventListener('change', renderTable);
