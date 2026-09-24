@@ -11,43 +11,50 @@ document.addEventListener('DOMContentLoaded', async () => {
   let secondsElapsed = 0;
   let currentWord = null;
 
-  const GRID_ROWS = 20;
-  const GRID_COLS = 23;
+  // Ukuran grid ini diambil dengan mengukur ulang foto TTS secara presisi
+  // (deteksi garis kotak per piksel), sehingga bentuk & posisi setiap kata
+  // sekarang identik dengan foto aslinya.
+  const GRID_ROWS = 17;
+  const GRID_COLS = 33;
 
   /**
-   * MAP PERSISI BERDASARKAN FOTO TTS:
-   * row: Indeks baris (0-19 dari atas ke bawah)
-   * col: Indeks kolom (0-22 dari kiri ke kanan)
+   * MAP HASIL EKSTRAKSI PRESISI DARI FOTO TTS:
+   * row: Indeks baris (0-16 dari atas ke bawah)
+   * col: Indeks kolom (0-32 dari kiri ke kanan)
    * len: Jumlah kotak/huruf
    *
-   * Catatan Penting Penulisan:
-   * - Mendatar (across): Huruf pertama di (row, col), berjalan MENDATAR KE KIRI (col - i).
-   * - Menurun (down): Huruf pertama di (row, col), berjalan MENURUN KE BAWAH (row + i).
+   * Catatan Penulisan:
+   * - Mendatar (across): huruf pertama di (row, col), berjalan MENDATAR KE KIRI (col - i).
+   * - Menurun (down): huruf pertama di (row, col), berjalan MENURUN KE BAWAH (row + i).
+   *
+   * Nomor soal & letak sel awal setiap kata sudah divalidasi lewat algoritma
+   * penomoran TTS standar dan cocok 100% dengan nomor pada foto
+   * (Across: 4,5,9,11,14,16,17,18 — Down: 1,2,3,5,6,7,8,10,12,13,14,15).
    */
   const PUZZLE_WORDS = [
     // --- ACROSS (MENDATAR) ---
-    { num: 4, dir: 'across', text: 'Ibu', row: 1, col: 12, len: 3 },                  // 1. Mother (أم)
-    { num: 5, dir: 'across', text: 'Ruang kantor', row: 4, col: 22, len: 10 },        // 5. Office (غرفة المكتب)
-    { num: 9, dir: 'across', text: 'Kamar mandi', row: 6, col: 14, len: 4 },          // 9. Bathroom (حمام)
-    { num: 11, dir: 'across', text: 'Kamar tidur', row: 8, col: 22, len: 9 },         // 11. Bedroom (غرفة النوم)
-    { num: 14, dir: 'across', text: 'Kakak perempuan saya', row: 9, col: 22, len: 14 },// 14. Older sister (أختي الكبيرة)
-    { num: 16, dir: 'across', text: 'Adik perempuan saya', row: 11, col: 15, len: 14 },// 16. Younger sister (أختي الصغيرة)
-    { num: 17, dir: 'across', text: 'Ayah', row: 14, col: 8, len: 3 },                 // 17. Father (أب)
-    { num: 18, dir: 'across', text: 'Dia pergi', row: 15, col: 11, len: 3 },           // 18. Went (ذهب)
+    { num: 4,  dir: 'across', text: 'Ibu',                   row: 2,  col: 20, len: 4 },
+    { num: 5,  dir: 'across', text: 'Ruang kantor',          row: 3,  col: 9,  len: 10 },
+    { num: 9,  dir: 'across', text: 'Kamar mandi',           row: 5,  col: 19, len: 4 },
+    { num: 11, dir: 'across', text: 'Kamar tidur',           row: 6,  col: 12, len: 9 },
+    { num: 14, dir: 'across', text: 'Kakak perempuan saya',  row: 7,  col: 32, len: 11 },
+    { num: 16, dir: 'across', text: 'Adik perempuan saya',   row: 8,  col: 21, len: 11 },
+    { num: 17, dir: 'across', text: 'Ayah',                  row: 12, col: 26, len: 4 },
+    { num: 18, dir: 'across', text: 'Dia pergi',             row: 13, col: 23, len: 4 },
 
     // --- DOWN (MENURUN) ---
-    { num: 1, dir: 'down', text: 'Pintu gerbang', row: 0, col: 8, len: 5 },           // 1. Gate (بوابة)
-    { num: 2, dir: 'down', text: 'Ruang belajar', row: 0, col: 19, len: 10 },         // 2. Study room (غرفة التعلم)
-    { num: 3, dir: 'down', text: 'Saya tidur', row: 1, col: 11, len: 4 },             // 3. Sleep (أنام)
-    { num: 5, dir: 'down', text: 'Ruang tamu', row: 4, col: 18, len: 9 },             // 5. Living room (غرفة الجلوس)
-    { num: 6, dir: 'down', text: 'Lantai atas', row: 4, col: 3, len: 5 },              // 6. Upper floor (الطابق)
-    { num: 7, dir: 'down', text: 'Balkon/teras rumah', row: 6, col: 15, len: 4 },     // 7. Balcony (شرفة)
-    { num: 8, dir: 'down', text: 'Lantai bawah', row: 6, col: 11, len: 5 },            // 8. Lower floor (السفل)
-    { num: 10, dir: 'down', text: 'Dapur', row: 8, col: 21, len: 4 },                 // 10. Kitchen (مطبخ)
-    { num: 12, dir: 'down', text: 'Kakak laki-laki saya', row: 9, col: 11, len: 10 }, // 12. Older brother (أخي الكبير)
-    { num: 13, dir: 'down', text: 'Ibu rumah tangga', row: 9, col: 7, len: 10 },      // 13. Housewife (ربة البيت)
-    { num: 14, dir: 'down', text: 'Adik laki-laki saya', row: 9, col: 0, len: 10 },   // 14. Younger brother (أخي الصغير)
-    { num: 15, dir: 'down', text: 'Ruang makan', row: 10, col: 13, len: 10 }          // 15. Dining room (غرفة الأكل)
+    { num: 1,  dir: 'down', text: 'Pintu gerbang',           row: 0, col: 20, len: 5 },
+    { num: 2,  dir: 'down', text: 'Ruang belajar',           row: 1, col: 7,  len: 12 },
+    { num: 3,  dir: 'down', text: 'Saya tidur',              row: 2, col: 18, len: 4 },
+    { num: 5,  dir: 'down', text: 'Ruang tamu',              row: 3, col: 9,  len: 10 },
+    { num: 6,  dir: 'down', text: 'Lantai atas',             row: 3, col: 25, len: 12 },
+    { num: 7,  dir: 'down', text: 'Balkon/teras rumah',      row: 5, col: 11, len: 4 },
+    { num: 8,  dir: 'down', text: 'Lantai bawah',            row: 5, col: 17, len: 12 },
+    { num: 10, dir: 'down', text: 'Dapur',                   row: 6, col: 4,  len: 4 },
+    { num: 12, dir: 'down', text: 'Kakak laki-laki saya',    row: 7, col: 20, len: 9 },
+    { num: 13, dir: 'down', text: 'Ibu rumah tangga',        row: 7, col: 23, len: 8 },
+    { num: 14, dir: 'down', text: 'Adik laki-laki saya',     row: 7, col: 32, len: 9 },
+    { num: 15, dir: 'down', text: 'Ruang makan',             row: 8, col: 14, len: 9 },
   ];
 
   const cellMap = {};
@@ -113,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const gridEl = document.getElementById('crossword-grid');
     gridEl.innerHTML = '';
 
-    // Render kotak dasar 20 x 23
+    // Render kotak dasar (grid kosong penuh)
     for (let r = 0; r < GRID_ROWS; r++) {
       for (let c = 0; c < GRID_COLS; c++) {
         const cell = document.createElement('div');
@@ -128,8 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     PUZZLE_WORDS.forEach(w => {
       for (let i = 0; i < w.len; i++) {
         let r = w.row + (w.dir === 'down' ? i : 0);
-        let c = w.col - (w.dir === 'across' ? i : 0); // Ke Kiri untuk Across
-
+        let c = w.col - (w.dir === 'across' ? i : 0);
         const cell = gridEl.querySelector(`[data-row='${r}'][data-col='${c}']`);
         if (cell) {
           cell.classList.add('white');
@@ -144,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
-      // Pasang Nomor Soal di Kotak Pertama Kata
+      // Pasang Nomor Soal di Kotak Awal Kata (kanan untuk across, atas untuk down)
       const numCell = gridEl.querySelector(`[data-row='${w.row}'][data-col='${w.col}']`);
       if (numCell && !numCell.querySelector('.cell-number')) {
         const numSpan = document.createElement('span');
@@ -163,16 +169,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     PUZZLE_WORDS.forEach(w => {
       const li = document.createElement('li');
-      li.textContent = `${w.num}. | ${w.text}`;
+      li.textContent = `${w.num}. ${w.text}`;
       li.dataset.num = w.num;
       li.dataset.dir = w.dir;
-
       li.addEventListener('click', () => {
         highlightWord(w);
         const firstCell = cellMap[`${w.row},${w.col}`];
         if (firstCell) firstCell.focus();
       });
-
       if (w.dir === 'across') acrossEl.appendChild(li);
       else downEl.appendChild(li);
     });
@@ -202,7 +206,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       input.addEventListener('focus', () => {
         document.querySelectorAll('.cell').forEach(cell => cell.classList.remove('active-cell'));
         input.parentElement.classList.add('active-cell');
-
         if (!currentWord) {
           const w = PUZZLE_WORDS.find(word => {
             if (word.dir === 'across' && word.row === r && c <= word.col && c > word.col - word.len) return true;
@@ -216,13 +219,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       input.addEventListener('input', (e) => {
         const val = e.target.value;
         const arabicRegex = /^[\u0600-\u06FF]$/;
-
         // Hanya menerima karakter Unicode Arab
         if (!arabicRegex.test(val)) {
           e.target.value = '';
           return;
         }
-
         if (currentWord) {
           moveToNextCell(r, c);
         }
@@ -239,8 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function moveToNextCell(r, c) {
     if (!currentWord) return;
     let nextR = r + (currentWord.dir === 'down' ? 1 : 0);
-    let nextC = c - (currentWord.dir === 'across' ? 1 : 0); // Maju ke kiri untuk across
-
+    let nextC = c - (currentWord.dir === 'across' ? 1 : 0);
     const nextInput = cellMap[`${nextR},${nextC}`];
     if (nextInput) nextInput.focus();
   }
@@ -248,8 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function moveToPrevCell(r, c) {
     if (!currentWord) return;
     let prevR = r - (currentWord.dir === 'down' ? 1 : 0);
-    let prevC = c + (currentWord.dir === 'across' ? 1 : 0); // Mundur ke kanan untuk across
-
+    let prevC = c + (currentWord.dir === 'across' ? 1 : 0);
     const prevInput = cellMap[`${prevR},${prevC}`];
     if (prevInput) {
       prevInput.focus();
@@ -259,7 +258,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('btn-submit').addEventListener('click', async () => {
     if (!confirm('Apakah Anda yakin ingin mengumpulkan jawaban?')) return;
-
     clearInterval(timerInterval);
 
     const userAnswers = PUZZLE_WORDS.map(w => {

@@ -253,12 +253,12 @@ body {
 }
 
 /* ==========================================================================
-   PUZZLE TTS - GRID SYSTEM (SESUAI DENGAN PDF/FOTO)
+   PUZZLE TTS - GRID SYSTEM (SESUAI DENGAN FOTO — 33 kolom x 17 baris)
    ========================================================================== */
 .grid-table {
   display: grid;
-  grid-template-columns: repeat(23, var(--cell-size));
-  grid-template-rows: repeat(20, var(--cell-size));
+  grid-template-columns: repeat(33, var(--cell-size));
+  grid-template-rows: repeat(17, var(--cell-size));
   gap: 1px; /* Jarak ini menciptakan garis grid */
   background-color: #000000; /* Warna garis batas */
   border: 2px solid #000000; /* Batas luar yang tebal */
